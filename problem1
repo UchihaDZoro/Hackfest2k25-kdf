@@ -1,0 +1,103 @@
+import cv2
+import time
+import os
+from ultralytics import YOLO
+from paddleocr import PaddleOCR
+# from inference_sdk import InferenceHTTPClient
+
+# # --- Initialize Roboflow Inference Client ---
+# CLIENT = InferenceHTTPClient(
+#     api_url="https://detect.roboflow.com",
+#     api_key=""  # 🔑 Replace with your actual API key
+# )
+
+# --- Load Local Models ---
+person_model = YOLO('yolov8n.pt')  # COCO pre-trained
+ocr = PaddleOCR(lang='en')        # License plate OCR
+
+# --- Initialize Video Capture ---
+cap = cv2.VideoCapture(0)
+
+# --- Stub for fence tampering (mocked for Windows) ---
+def detect_fence_tampering():
+    if int(time.time()) % 30 == 0:
+        print("[ALERT] Fence tampering detected!")
+# -----------------------------------------------------
+
+def detect_personnel(frame):
+    results = person_model(frame)
+    for result in results:
+        for box in result.boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            conf = box.conf[0].item()
+            cls = int(box.cls[0].item())
+            if cls == 0 and conf > 0.5:
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, f'Person {conf:.2f}', (x1, y1 - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    return frame
+
+VEHICLE_CLASSES = [2, 3, 5, 7]
+
+def detect_vehicles_yolo(frame):
+    results = person_model(frame)  # reuse YOLOv8 loaded as 'person_model'
+    for result in results:
+        for box in result.boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            conf = box.conf[0].item()
+            cls = int(box.cls[0].item())
+            if cls in VEHICLE_CLASSES and conf > 0.4:
+                class_name = person_model.names[cls]
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 165, 0), 2)
+                cv2.putText(frame, f'{class_name} {conf:.2f}', (x1, y1 - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 165, 0), 2)
+    return frame
+
+
+def detect_drones_via_roboflow(frame):
+    # Save frame temporarily
+    temp_filename = "temp_frame.jpg"
+    cv2.imwrite(temp_filename, frame)
+
+    # Send to Roboflow for inference
+    try:
+        result = CLIENT.infer(temp_filename, model_id="dronedet-9ndje/2")
+        predictions = result['predictions']
+        for pred in predictions:
+            x, y, width, height = int(pred['x']), int(pred['y']), int(pred['width']), int(pred['height'])
+            conf = pred['confidence']
+            x1 = x - width // 2
+            y1 = y - height // 2
+            x2 = x + width // 2
+            y2 = y + height // 2
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(frame, f"Drone {conf:.2f}", (x1, y1 - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    except Exception as e:
+        print(f"[ERROR] Drone detection failed: {e}")
+    
+    # Clean up temp file
+    if os.path.exists(temp_filename):
+        os.remove(temp_filename)
+
+    return frame
+
+# ----------------- Main Surveillance Loop ------------------
+print("🔍 Starting real-time surveillance... Press 'q' to quit.")
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # detect_fence_tampering()
+    # frame = detect_personnel(frame)
+    frame = detect_vehicles_yolo(frame)
+    # frame = detect_drones_via_roboflow(frame)
+
+    cv2.imshow("Border Security Surveillance", frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
