@@ -56,10 +56,6 @@ io.on("connection", (socket) => {
 
   // Listen for alert from ML
   socket.on("send_alert", (alertData) => {
-    if (!alertData?.type) {
-      console.warn("⚠️ Invalid alert received, missing 'type':", alertData);
-      return;
-    }
 
     const alertWithTimestamp = {
       ...alertData,
