@@ -1,0 +1,14 @@
+opencv-python-headless==4.9.* # Or opencv-python if you need GUI functions locally
+ultralytics==8.0.* # YOLOv8 library
+numpy==1.26.*
+PyYAML==6.0.*
+requests                      # For potential webhook alerts
+# Optional:
+# filterpy                     # Often used by trackers like SORT
+# lap                         # Often used by trackers like SORT
+# scipy                       # Often used by trackers
+# onnxruntime-gpu             # If using ONNX models with GPU
+# tensorrt                    # If building/using TensorRT engines (requires manual installation matching JetPack)
+# twilio                      # If using Twilio for SMS alerts
+# Flask or FastAPI            # For building a dashboard/API endpoint
+# Streamlit                   # For building a quick dashboard demo

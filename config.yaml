@@ -1,0 +1,61 @@
+# --- Input Configuration ---
+sources:
+  - type: webcam # Options: webcam, rtsp, file
+    uri: 0       # Device index, RTSP URL, or file path
+    name: "Gate_Camera_RGB"
+    process_thermal: false # Flag if this is a thermal source needing specific model/processing
+#  - type: rtsp
+#    uri: "rtsp://user:pass@ip_address:port/stream"
+#    name: "Fence_Camera_1_RGB"
+#    process_thermal: false
+#  - type: file
+#    uri: "/path/to/your/video.mp4"
+#    name: "Test_Video"
+#    process_thermal: false
+#  - type: rtsp
+#    uri: "rtsp://user:pass@ip_address_thermal:port/stream"
+#    name: "Fence_Camera_1_Thermal"
+#    process_thermal: true
+
+# --- Model Configuration ---
+detection_model_rgb: "models/yolov8n.pt" # Path to RGB detection model (.pt, .onnx, .engine)
+detection_model_thermal: "models/yolov8n.pt" # Path to specific thermal model (use same for now)
+segmentation_model_path: "models/sam_b.pt" # Path to SAM model checkpoint
+device: 0 # GPU device index (e.g., 0) or 'cpu'
+
+# --- Processing Parameters ---
+confidence_threshold: 0.40 # Detection confidence
+iou_threshold: 0.50        # NMS IoU threshold
+detection_classes: [0, 2, 3, 5, 7] # Classes to detect (e.g., 0: person, 2: car, 3: motorcycle, 5: bus, 7: truck, potentially drone class if trained)
+max_latency_ms: 500       # Target processing latency (for monitoring)
+frame_skip: 0             # Process every 'frame_skip + 1' frames (0 means process all)
+
+# --- Tracking Parameters ---
+tracker_type: "bytetrack" # Options: bytetrack, botsort (defined in ultralytics)
+tracker_config: "trackers/bytetrack.yaml" # Specific tracker config file path (comes with ultralytics install usually)
+
+# --- Behavior Analysis ---
+loitering_threshold_seconds: 10 # Time in seconds to trigger loitering alert
+fence_zones: # List of polygons defining sensitive fence areas [[(x1,y1), (x2,y2), ...], ...]
+  - [[100, 100], [500, 100], [500, 150], [100, 150]] # Example zone (needs adjustment based on camera view)
+fence_proximity_threshold: 10 # Pixel distance threshold to consider interaction
+
+# --- Alerting ---
+alert_cooldown_seconds: 30 # Minimum time between alerts for the same track ID
+enable_console_alerts: true
+enable_sms_alerts: false # Requires twilio setup
+twilio_sid: "YOUR_TWILIO_SID"
+twilio_token: "YOUR_TWILIO_AUTH_TOKEN"
+twilio_from: "+1_YOUR_TWILIO_NUMBER"
+twilio_to: "+1_RECIPIENT_NUMBER"
+enable_webhook_alerts: false
+webhook_url: "http://your-dashboard-api/alert"
+
+# --- Visualization ---
+show_video: true
+draw_detections: true
+draw_tracks: true
+draw_segmentation: false # SAM is heavy, enable cautiously
+draw_fence_zones: true
+draw_heatmaps: false # Requires separate implementation
+output_video_path: null # Set path to save processed video, e.g., "output/processed_video.mp4"
