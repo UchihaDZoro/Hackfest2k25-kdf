@@ -1,73 +1,98 @@
-🛡️ AI-Powered Border Surveillance System
-An end-to-end AI-driven prototype for intelligent border surveillance, featuring real-time object detection, behavioral analysis, edge deployment on Raspberry Pi, and live threat alerting via a web dashboard and SMS.
+# 🛡️ AI-Powered Border Surveillance System
 
-📁 Project Structure
-File/Folder	Description
-main.py	Main entry point to launch the full pipeline.
-alerting.py	Triggers alerts via Twilio when threats are detected.
-behavior_analysis.py	Behavioral profiling based on motion patterns.
-detection.py	Object detection using YOLOv8/YOLOv11 (NCNN on Pi).
-tracking.py	Tracks detected objects across frames.
-thermalbehaviour.ipynb	Handles thermal + RGB behavior analysis.
-live-model.ipynb	Notebook for real-time object detection demo.
-lstm_model.pth	Trained LSTM model for basic behavior prediction.
-lstm_behavior_extended.pth	Enhanced version of the LSTM behavior model.
-rpi_yolov11_*	Scripts for running YOLOv11 inference on Raspberry Pi.
-canvas.py, utils.py	Helper functions and drawing utilities.
-segmentation.py	Object/person segmentation module.
-input_manager.py	Handles multiple video streams or feeds.
-labelimg.py, labeling.sh	Tools for dataset labeling and annotation.
-config.yaml, data.txt	Config and data settings.
-requirements.txt	Python dependencies.
-video-processed.ipynb	Annotated output and demo of processed surveillance video.
-🚀 Key Features
-✅ Real-time object detection (YOLOv8/YOLOv11)
+An end-to-end AI-driven prototype for smart border monitoring using object detection, behavior analysis, and edge deployment. Designed for real-time surveillance, it runs on both standard and constrained hardware like Raspberry Pi.
 
-👣 Motion tracking and behavioral profiling (LSTM)
+---
 
-🔥 Fusion of thermal + RGB analysis
+## 📌 Features
 
-🧠 Risk heat map generation
+- 🔍 **Real-Time Object Detection** using YOLOv8 & YOLOv11 (NCNN)
+- 🧠 **Behavioral Analysis** with motion tracking and LSTM profiling
+- 🌡️ **Thermal + RGB Fusion** (if available)
+- 📍 **Dynamic Risk Heat Map** generation
+- 📡 **Edge Inference on Raspberry Pi 4**
+- 🌐 **Web Dashboard** (Streamlit/Flask)
+- 📲 **SMS Alert System** (Twilio API)
+- 🎥 **Multi-Camera Feed Simulation**
 
-🌐 Web-based dashboard (Streamlit/Flask)
+---
 
-📲 Instant SMS alerts (Twilio)
+## 🗂️ Project Structure
 
-🍓 Edge testing on Raspberry Pi 4 (NCNN optimized)
+| File/Folder                          | Description |
+|-------------------------------------|-------------|
+| `main.py`                           | Main script to launch the surveillance system |
+| `alerting.py`                       | Triggers alerts via Twilio |
+| `behavior_analysis.py`              | LSTM-based behavior profiling |
+| `detection.py`                      | Runs YOLO detection (PC version) |
+| `tracking.py`                       | Tracks detected entities |
+| `thermalbehaviour.ipynb`            | Analyzes thermal + RGB behavior |
+| `live-model.ipynb`                  | Real-time detection demo notebook |
+| `rpi_yolov11_*`                     | Object detection/segmentation scripts optimized for Pi |
+| `lstm_model.pth` / `lstm_behavior_extended.pth` | Trained LSTM behavior models |
+| `canvas.py`, `utils.py`             | Helper functions for drawing/tracking |
+| `segmentation.py`                   | Person/vehicle segmentation logic |
+| `labelimg.py`, `labeling.sh`        | Dataset annotation tools |
+| `input_manager.py`                  | Feed manager for multiple video streams |
+| `config.yaml`, `data.txt`           | Configuration files |
+| `requirements.txt`                  | Python dependencies |
+| `video-processed.ipynb`             | Annotated demo of detection results |
 
-⚙️ How to Run
-Clone the repo and install dependencies:
+---
 
-bash
-Copy
-Edit
+## ⚙️ Setup & Run
+
+1. Clone the repo:
+
+```bash
+git clone <your-repo-url>
+cd <repo-folder>
+```
+
+2. Install dependencies:
+
+```bash
 pip install -r requirements.txt
-Run detection + tracking:
+```
 
-bash
-Copy
-Edit
+3. Run main detection pipeline:
+
+```bash
 python main.py
-To test on Raspberry Pi using YOLOv11 NCNN:
+```
 
-bash
-Copy
-Edit
+4. For Raspberry Pi edge test (YOLOv11):
+
+```bash
 python rpi_yolov11_object_detection_on_custom_dataset.py
-📊 Outputs
-Live detection stream
+```
 
-Behavior flag logs
+---
 
-Risk heat map
+## 🧠 Model Stack
 
-SMS notifications
+- YOLOv8 for object detection on PC
+- YOLOv11 + NCNN module on Raspberry Pi
+- LSTM for activity recognition
+- OpenCV for tracking and motion detection
 
-Dashboard with feed + analytics
+---
 
-🧠 Models Used
-YOLOv8 for detection (PC)
+## 📊 Outputs
 
-YOLOv11 with NCNN for Pi edge deployment
+- Live annotated video stream
+- Real-time behavior alerts
+- Risk heat map dashboard
+- SMS alerts for high-risk detections
+- Detection logs and tracking history
 
-LSTM for behavior analysis
+---
+
+## 🏁 Goals
+
+- ✅ Build a lightweight and scalable AI border surveillance prototype
+- ✅ Achieve real-time performance on edge hardware
+- ✅ Demonstrate multi-modal sensing and alert generation
+
+---
+
