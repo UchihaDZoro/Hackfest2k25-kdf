@@ -1,15 +1,21 @@
-// src/Logs.jsx
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
 
 function Logs() {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    fetch(`http://${window.location.hostname}:6969/api/logs`)
-      .then((res) => res.json())
-      .then((data) => setLogs(data))
-      .catch((err) => console.error("Failed to fetch logs", err));
+    const fetchLogs = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/logs`);
+        console.log("Fetched logs:", response.data);
+        setLogs(response.data);
+      } catch (error) {
+        console.error("Failed to fetch logs", error);
+      }
+    };
+
+    fetchLogs();
   }, []);
 
   return (
@@ -21,7 +27,7 @@ function Logs() {
 
         <div className="space-y-4">
           {logs.length === 0 ? (
-            <p className="text-gray-600">No logs yet.</p>
+            <p className="text-center text-gray-500 italic">No logs yet. You're all clear 🚀</p>
           ) : (
             logs.map((log, index) => (
               <div
@@ -32,7 +38,7 @@ function Logs() {
                   {log.message || JSON.stringify(log)}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {new Date(log.time).toLocaleString()}
+                  {new Date(log.timestamp).toLocaleString()}
                 </p>
               </div>
             ))

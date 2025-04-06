@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { motion, AnimatePresence } from "framer-motion";
+import { BellAlertIcon, CameraIcon } from "@heroicons/react/24/outline";
 
-const socket = io(`http://10.1.7.104:6969`);
+const socket = io(import.meta.env.VITE_BACKEND_URL);
 
 function Dashboard() {
   const [currentAlert, setCurrentAlert] = useState(null);
@@ -45,9 +46,14 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* 🔺 Alert Box */}
+    <div className="min-h-screen bg-gray-50 p-6 font-sans">
+      <div className="max-w-7xl mx-auto space-y-10">
+        {/* 🧠 Title */}
+        <header className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-800">📹 Surveillance Dashboard</h1>
+        </header>
+
+        {/* 🚨 Alert Box */}
         <div className="min-h-[60px]">
           <AnimatePresence mode="wait">
             <motion.div
@@ -55,56 +61,54 @@ function Dashboard() {
               initial={{ x: 300, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4 }}
               className={`${
                 currentAlert
-                  ? "bg-red-100 border border-red-400 text-red-700"
-                  : "bg-gray-100 border border-gray-300 text-gray-600"
-              } px-4 py-3 rounded shadow-md relative`}
+                  ? "bg-red-100 border border-red-300 text-red-800"
+                  : "bg-white border border-gray-300 text-gray-600"
+              } px-5 py-4 rounded-xl shadow-md relative text-sm md:text-base`}
             >
               {currentAlert ? (
                 <>
-                  <strong className="font-bold">🚨 Alert:</strong>{" "}
-                  {currentAlert.message}
-                  <div className="absolute bottom-1 right-2 text-xs text-red-500">
+                  <div className="flex items-center gap-2">
+                    <BellAlertIcon className="w-5 h-5 text-red-500" />
+                    <span className="font-semibold">{currentAlert.message}</span>
+                  </div>
+                  <div className="absolute bottom-1 right-3 text-xs text-red-400">
                     {new Date(currentAlert.timestamp).toLocaleString()}
                   </div>
                 </>
               ) : (
-                <span className="text-sm">
-                  No alerts for Camera {selectedCamera}
-                </span>
+                <span>No alerts for Camera {selectedCamera}</span>
               )}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* ⬜ Big Camera View & Heatmap */}
+        {/* 🎥 Camera Views */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-md flex items-center justify-center aspect-square w-full text-gray-700 text-xl font-semibold">
-            <video
-              src="/camera.mp4"
-              autoPlay
-              loop
-              muted
-              className="w-full h-full object-cover rounded-xl"
+          <div className="bg-white rounded-2xl shadow-md aspect-square overflow-hidden">
+            <img
+              src={`http://localhost:6924/video${selectedCamera}`}
+              alt={`Camera ${selectedCamera} Live`}
+              className="w-full h-full object-cover"
             />
           </div>
-          <div className="bg-white rounded-xl shadow-md flex items-center justify-center aspect-square w-full text-gray-700 text-xl font-semibold">
+          <div className="bg-white rounded-2xl shadow-md aspect-square overflow-hidden">
             <video
               src="/output.mp4"
               autoPlay
               loop
               muted
-              className="w-full h-full object-cover rounded-xl"
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
 
-        {/* 🔻 Camera Count Selector */}
-        <div className="flex items-center gap-4 mt-4">
-          <label htmlFor="camera-count" className="text-lg font-medium">
-            🎥 Number of Cameras:
+        {/* 🔧 Controls */}
+        <div className="flex items-center gap-4">
+          <label htmlFor="camera-count" className="text-lg font-medium text-gray-700 flex items-center gap-2">
+            <CameraIcon className="w-5 h-5" /> Number of Cameras:
           </label>
           <select
             id="camera-count"
@@ -120,7 +124,7 @@ function Dashboard() {
           </select>
         </div>
 
-        {/* 🔻 Camera Grid */}
+        {/* 🗂 Camera Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {Array.from({ length: cameraCount }).map((_, index) => {
             const cameraId = index + 1;
@@ -128,15 +132,19 @@ function Dashboard() {
             return (
               <div
                 key={cameraId}
-                className={`cursor-pointer bg-white rounded-xl shadow-md border-2 transition-all hover:shadow-lg ${
+                className={`cursor-pointer bg-white rounded-xl shadow hover:shadow-lg transition border-2 ${
                   selectedCamera === cameraId
                     ? "border-blue-500 ring-2 ring-blue-300"
                     : "border-transparent"
                 }`}
                 onClick={() => handleCameraClick(cameraId)}
               >
-                <div className="aspect-square bg-gray-100 flex items-center justify-center rounded-t-xl text-gray-600 text-lg font-medium">
-                  📷 Camera {cameraId}
+                <div className="aspect-square overflow-hidden rounded-t-xl">
+                  <img
+                    src={`http://localhost:6924/video${cameraId}`}
+                    alt={`Camera ${cameraId}`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="px-3 py-2 text-sm">
                   <AnimatePresence mode="wait">
