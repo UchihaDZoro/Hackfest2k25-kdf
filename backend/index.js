@@ -43,7 +43,9 @@ const saveAlertsToFile = () => {
 
 // Send SMS with alert info
 const sendSMSAlert = (alertData) => {
-  const message = `🚨 Alert received!\nMessage: ${alertData.message || "No details"}\nTime: ${new Date(alertData.timestamp).toLocaleString()}`;
+  const message = `🚨 Alert received!\nMessage: ${
+    alertData.message || "No details"
+  }\nTime: ${new Date(alertData.timestamp).toLocaleString()}`;
 
   twilioClient.messages
     .create({
@@ -77,8 +79,8 @@ const io = new Server(server, {
 // Middlewares
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/processed', express.static(path.join(__dirname, 'processed')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/processed", express.static(path.join(__dirname, "processed")));
 
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -99,8 +101,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-
-
 // Handle socket events
 io.on("connection", (socket) => {
   console.log(`🟢 Client connected: ${socket.id}`);
@@ -120,6 +120,18 @@ io.on("connection", (socket) => {
     saveAlertsToFile();
     sendSMSAlert(alertWithTimestamp); // 🔔 Send SMS here
   });
+  socket.on("webcam_frame", (data) => {
+    const { camera_id, image } = data;
+
+    // Decode base64 image
+    const base64Data = image.replace(/^data:image\/jpeg;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
+
+    // You can now save to file or send to frontend (e.g., via a live route)
+    // fs.writeFileSync("frame.jpg", buffer); // Optional: save image
+
+    io.emit(`video_stream`, buffer); // Broadcast to viewers
+  });
 
   socket.on("disconnect", (reason) => {
     console.log(`🔴 Client disconnected: ${socket.id} (${reason})`);
@@ -130,7 +142,6 @@ io.on("connection", (socket) => {
 app.get("/api/logs", (req, res) => {
   res.json(alerts.slice().reverse()); // newest first
 });
-
 
 app.post("/api/process-video", upload.single("video"), (req, res) => {
   const inputPath = req.file.path;
@@ -156,7 +167,6 @@ app.post("/api/process-video", upload.single("video"), (req, res) => {
     fs.unlinkSync(inputPath);
   });
 });
-
 
 // Start server
 server.listen(PORT, HOST, () => {
